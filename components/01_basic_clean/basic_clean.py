@@ -25,7 +25,29 @@ logging.basicConfig(
 
 
 def clean_data(BUCKET_NAME_DATA):
+    '''
+    Loads, processes, and normalizes CSV files stored in an S3 bucket, 
+    separating the 2022 and 2023 data into distinct dataframes and renaming 
+    columns according to a specific pattern.
 
+    Parameters:
+    -----------
+    BUCKET_NAME_DATA : str
+        Name of the S3 bucket where the CSV files are stored.
+
+    Functionality:
+    ---------------
+    1. Creates an S3 client using boto3.
+    2. Retrieves the list of objects in the S3 bucket and loads CSV files.
+    3. For files containing '2022' in the name, the data is concatenated into the `df_hackers_2022` dataframe.
+    4. For files containing '2023' in the name, the data is concatenated into the `df_hackers_2023` dataframe.
+    5. Normalizes the columns of the 2022 dataframe, renaming them to a friendlier format.
+    6. Normalizes the columns of the 2023 dataframe, if available.
+
+    Returns:
+    --------
+    None
+    '''
     # create a client instance for S3
     s3_client = boto3.client('s3')
     logging.info('S3 authentication was created successfully.')

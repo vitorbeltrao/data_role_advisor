@@ -1,0 +1,6 @@
+name: main
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - mlflow=2.16.2

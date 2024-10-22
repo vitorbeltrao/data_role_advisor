@@ -4,6 +4,6 @@ conda_env: conda.yaml
 entry_points:
   main:
     parameters:
-      BUCKET_NAME_DATA_RAW: {type: str, default: 'datasets-data-role-advisor'}
+      BUCKET_NAME_DATA: {type: str, default: 'datasets-data-role-advisor'}
 
     command: "python basic_clean.py {BUCKET_NAME_DATA}"

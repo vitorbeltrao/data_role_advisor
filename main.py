@@ -1,9 +1,10 @@
 '''
 This is the main system file that runs all necessary
-components to run the machine learning pipeline
+components to run the machine learning pipeline using
+mlflow projects component
 
 Author: Vitor Abdo
-Date: March/2023
+Date: Oct/2024
 '''
 
 # import necessary packages
@@ -15,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--steps', type=str, default='all', help='Steps to execute')
 
 _steps = [
-    # 'basic_clean',
+    'basic_clean',
     # 'data_check',
     # 'train_model',
     # 'test_model',
@@ -38,17 +39,6 @@ def main():
                      The default value is 'all', which runs the entire pipeline. 
                      Valid options include 'basic_clean', 'data_check', 'train_model', 
                      'test_model', 'deployment'.
-
-    Example:
-        To run only the 'basic_clean' and 'train_model' steps:
-        ```
-        python main.py --steps basic_clean,train_model
-        ```
-
-        To run all steps:
-        ```
-        python main.py --steps all
-        ```
     '''
     # read command line arguments
     args = parser.parse_args()

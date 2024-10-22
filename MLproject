@@ -1,0 +1,7 @@
+name: data_role_advisor
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    command: "python main.py"
