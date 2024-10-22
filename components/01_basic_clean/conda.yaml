@@ -1,0 +1,9 @@
+name: clean_data
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip=24.2
+  - pandas=2.2.2
+  - boto3=1.34.154
+  - scikit-learn=1.5.1
