@@ -52,7 +52,7 @@ def main():
         mlflow.run(project_uri, parameters={'steps': 'basic_clean'})
 
     if 'train_test_model' in active_steps:
-        project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/02_train_test_model'
+        project_uri = 'https://github.com/vitorbeltrao/data_role_advisor#components/02_train_test_model'
         mlflow.run(project_uri)
 
     # if 'train_model' in active_steps:
