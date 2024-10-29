@@ -4,14 +4,13 @@ experiment:
   label_column: "cargo_label"
   cv: 5
   scoring: 
-    - "f1"
     - "balanced_accuracy"
   refit: "balanced_accuracy"
 
 # Model configurations
 models:
   - name: "XGBClassifier"
-    model: "XGBClassifier(use_label_encoder=False, eval_metric='logloss')"
+    model: "XGBClassifier()"
     param_grid:
       XGBClassifier__n_estimators: [50, 100]
       XGBClassifier__learning_rate: [0.01, 0.1]
@@ -21,4 +20,4 @@ models:
     model: "RandomForestClassifier()"
     param_grid:
       RandomForestClassifier__n_estimators: [50, 100]
-      RandomForestClassifier__max_depth: [None, 10]
+      RandomForestClassifier__max_depth: [5, 10]

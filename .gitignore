@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 /mlruns
+components/02_train_test_model/mlruns
+*.png

@@ -12,26 +12,39 @@ import yaml
 import logging
 import mlflow
 import timeit
+import boto3
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import seaborn as sns
 from datetime import datetime
 from mlflow.models.signature import infer_signature
-
+from xgboost import XGBClassifier
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import (
-    confusion_matrix, 
-    balanced_accuracy_score, 
-    f1_score, 
-    precision_score, 
+    confusion_matrix,
+    balanced_accuracy_score,
+    f1_score,
+    precision_score,
     recall_score)
 from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
 
 
 # config
 BUCKET_NAME_DATA = sys.argv[1]
+BUCKET_KEY_NAME = sys.argv[2]
+all_feat = [
+    'experiencia_manter_infraestrutura_modelos_e_solucoes_dados',
+    'desenvolve_pipelines_dados',
+    'desenvolve_dashboards_ferramentas_bi',
+    'experiencia_solucoes_feature_store_mlops',
+    'nao_usa_linguagem',
+    'usa_sql',
+    'desenvolve_modelos_machine_learning',
+    'cargo_label']
 binary_feat = [
     'experiencia_manter_infraestrutura_modelos_e_solucoes_dados',
     'desenvolve_pipelines_dados',
@@ -67,7 +80,7 @@ def get_inference_pipeline() -> Pipeline:
     preproc = ColumnTransformer(
         transformers=[
             ('binary', binary_preproc, binary_feat)
-        ], remainder='drop')
+        ], remainder='passthrough')
 
     # combine all the processed feature names into a single list
     processed_features = binary_feat
@@ -98,10 +111,14 @@ def feature_importance_plot(model, preprocessor, output_image_path) -> None:
     feature_names = preprocessor.get_feature_names_out()
 
     # Create DataFrame with feature importances
-    global_exp = pd.DataFrame(feature_importances, index=feature_names, columns=['importance'])
+    global_exp = pd.DataFrame(
+        feature_importances,
+        index=feature_names,
+        columns=['importance'])
 
     # Sort the DataFrame by importance
-    global_exp_sorted = global_exp.sort_values(by='importance', ascending=False)
+    global_exp_sorted = global_exp.sort_values(
+        by='importance', ascending=False)
 
     # Plot feature importances
     plt.figure(figsize=(10, 6))
@@ -158,13 +175,13 @@ def load_model_configs(yaml_file):
 
 
 def run_grid_search(
-        config, 
-        experiment_id, 
-        dataset, 
-        test_size, 
-        label_column, 
-        cv, 
-        scoring, 
+        config,
+        experiment_id,
+        dataset,
+        test_size,
+        label_column,
+        cv,
+        scoring,
         refit):
     '''
     Run a grid search, log parameters, metrics, and models to MLflow.
@@ -183,7 +200,7 @@ def run_grid_search(
 
     train_set, test_set = train_test_split(
         dataset, test_size=test_size, random_state=42)
-    
+
     preproc, _ = get_inference_pipeline()
 
     X_train = train_set.drop([label_column], axis=1)
@@ -198,11 +215,11 @@ def run_grid_search(
         mlflow.log_param('Experiment_id', experiment_id)
         run = mlflow.active_run()
         mlflow.log_param('Active run', run.info.run_id)
-        
+
         # Define pipeline
         pipeline = Pipeline(steps=[
-            ('preprocessor', preproc), 
-            (config['name'], config['model'])
+            ('preprocessor', preproc),
+            (config['name'], eval(config['model']))
         ])
 
         # Define grid search
@@ -226,8 +243,10 @@ def run_grid_search(
         # Log metrics
         best_index = grid_search.best_index_
         for metric in scoring:
-            best_train_score = grid_search.cv_results_[f'mean_train_{metric}'][best_index]
-            best_val_score = grid_search.cv_results_[f'mean_test_{metric}'][best_index]
+            best_train_score = grid_search.cv_results_[
+                f'mean_train_{metric}'][best_index]
+            best_val_score = grid_search.cv_results_[
+                f'mean_test_{metric}'][best_index]
             mlflow.log_metric(f'train_{metric}', best_train_score)
             mlflow.log_metric(f'val_{metric}', best_val_score)
 
@@ -249,41 +268,38 @@ def run_grid_search(
             if metric == 'accuracy' or metric == 'balanced_accuracy':
                 test_score = balanced_accuracy_score(y_test, final_predictions)
             elif metric == 'precision':
-                test_score = precision_score(y_test, final_predictions, average='weighted')
+                test_score = precision_score(y_test, final_predictions)
             elif metric == 'recall':
-                test_score = recall_score(y_test, final_predictions, average='weighted')
+                test_score = recall_score(y_test, final_predictions)
             elif metric == 'f1':
-                test_score = f1_score(y_test, final_predictions, average='weighted')
+                test_score = f1_score(y_test, final_predictions)
             else:
-                raise ValueError(f'Metric {metric} is not implemented for logging on test data.')
-            
+                raise ValueError(
+                    f'Metric {metric} is not implemented for logging on test data.')
+
             mlflow.log_metric(f'test_{metric}', test_score)
             mlflow.log_artifact(f'confusion_matrix_{config['name']}.png')
 
         # Log the model
         signature = infer_signature(X_test, final_predictions)
-        input_example = {
-            'columns': X_test.columns.to_list(),
-            'data': X_test.head().to_dict()
-        }
         if config['name'] == 'XGBClassifier':
             mlflow.xgboost.log_model(
                 grid_search.best_estimator_.named_steps[config['name']],
                 'best_model',
                 signature=signature,
-                input_example=input_example)
+                input_example=X_test.head(1))
         else:
             mlflow.sklearn.log_model(
                 grid_search.best_estimator_.named_steps[config['name']],
                 'best_model',
                 signature=signature,
-                input_example=input_example)
+                input_example=X_test.head(1))
 
         # Register the model
         mlflow.register_model(
             f'runs:/{run.info.run_id}/best_model',
             config['name'])
-        
+
     logging.info('Finish model tracking with mlflow.')
 
 
@@ -296,7 +312,7 @@ if __name__ == "__main__":
     experiment_name = config['experiment']['name']
 
     # If experiment doesn't not exist, create it
-    if(not(mlflow.get_experiment_by_name(experiment_name))):
+    if (not (mlflow.get_experiment_by_name(experiment_name))):
         mlflow.create_experiment(experiment_name)
 
     # Set up the running experiment to registry in mlflow
@@ -304,25 +320,21 @@ if __name__ == "__main__":
     experiment_id = experiment.experiment_id
 
     # Get the dataset
-
+    s3_client = boto3.client('s3')
+    obj = s3_client.get_object(Bucket=BUCKET_NAME_DATA, Key=BUCKET_KEY_NAME)
+    dataset = pd.read_csv(obj['Body'])
+    cleaned_dataset = dataset[all_feat]
 
     # Execute the "run_grid_search" func
     for model_config in config['models']:
         run_grid_search(
-            config=model_config, 
-            experiment_id=experiment_id, 
-            dataset=dataset, 
-            test_size=config['experiment']['test_size'], 
-            label_column=config['experiment']['label_column'], 
-            cv=config['experiment']['cv'], 
-            scoring=config['experiment']['scoring'], 
+            config=model_config,
+            experiment_id=experiment_id,
+            dataset=cleaned_dataset,
+            test_size=config['experiment']['test_size'],
+            label_column=config['experiment']['label_column'],
+            cv=config['experiment']['cv'],
+            scoring=config['experiment']['scoring'],
             refit=config['experiment']['refit'])
-
-
-
-
-
-
-
 
     logging.info('Done executing the train_test_model function.')

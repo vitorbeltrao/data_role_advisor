@@ -1,0 +1,10 @@
+name: train_test_model
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      BUCKET_NAME_DATA: {type: str, default: 'datasets-data-role-advisor'}
+      BUCKET_KEY_NAME: {type: str, default: 'bronze/data_hackers_final.csv'}
+
+    command: "python train_test_model.py {BUCKET_NAME_DATA} {BUCKET_KEY_NAME}"
