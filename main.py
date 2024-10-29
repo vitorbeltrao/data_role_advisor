@@ -17,7 +17,7 @@ parser.add_argument('--steps', type=str, default='all', help='Steps to execute')
 
 _steps = [
     'basic_clean',
-    # 'data_check',
+    'train_test_model',
     # 'train_model',
     # 'test_model',
     # 'deployment'
@@ -51,9 +51,9 @@ def main():
         project_uri = 'https://github.com/vitorbeltrao/data_role_advisor#components/01_basic_clean'
         mlflow.run(project_uri, parameters={'steps': 'basic_clean'})
 
-    # if 'data_check' in active_steps:
-    #     project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/04_data_check'
-    #     mlflow.run(project_uri)
+    if 'train_test_model' in active_steps:
+        project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/02_train_test_model'
+        mlflow.run(project_uri)
 
     # if 'train_model' in active_steps:
     #     project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/05_train_model'
