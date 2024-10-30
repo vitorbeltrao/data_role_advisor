@@ -310,9 +310,8 @@ if __name__ == "__main__":
 
     # Execute experiment
     experiment_name = config['experiment']['name']
-    print(experiment_name)
 
-    # If experiment doesn't not exist, create it
+    # If experiment doesn't exist, create it
     if (not (mlflow.get_experiment_by_name(experiment_name))):
         mlflow.create_experiment(experiment_name)
 

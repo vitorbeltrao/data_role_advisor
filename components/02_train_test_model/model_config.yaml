@@ -1,5 +1,5 @@
 experiment:
-  name: "Data Role Advisor Experiment I"
+  name: "Data Role Advisor Experiment II"
   test_size: 0.15
   label_column: "cargo_label"
   cv: 5
