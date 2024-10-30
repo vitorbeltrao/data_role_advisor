@@ -209,7 +209,7 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
-    with mlflow.start_run(experiment_id=experiment_id):
+    with mlflow.start_run(experiment_id=experiment_id, nested=True):
         # Log experiment metadata
         mlflow.log_param('Date', date)
         mlflow.log_param('Experiment_id', experiment_id)
@@ -312,8 +312,8 @@ if __name__ == "__main__":
     experiment_name = config['experiment']['name']
 
     # If experiment doesn't exist, create it
-    # if (not(mlflow.get_experiment_by_name(experiment_name))):
-    mlflow.create_experiment(experiment_name)
+    if (not(mlflow.get_experiment_by_name(experiment_name))):
+        mlflow.create_experiment(experiment_name)
 
     # Set up the running experiment to registry in mlflow
     experiment = mlflow.set_experiment(experiment_name)
