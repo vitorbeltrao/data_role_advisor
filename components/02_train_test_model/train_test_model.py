@@ -209,7 +209,7 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
-    with mlflow.start_run(experiment_id=experiment_id, nested=True):
+    with mlflow.start_run(experiment_id=experiment_id):
         # Log experiment metadata
         mlflow.log_param('Date', date)
         mlflow.log_param('Experiment_id', experiment_id)
@@ -318,7 +318,6 @@ if __name__ == "__main__":
     # Set up the running experiment to registry in mlflow
     experiment = mlflow.set_experiment(experiment_name)
     experiment_id = experiment.experiment_id
-    print(experiment_id)
 
     # Get the dataset
     s3_client = boto3.client('s3')
