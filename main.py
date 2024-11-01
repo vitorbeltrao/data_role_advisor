@@ -1,71 +1,61 @@
 '''
-This is the main system file that runs all necessary
-components to run the machine learning pipeline using
-mlflow projects component
+Main script to execute the machine learning pipeline using MLflow Projects.
+
+This file orchestrates the necessary steps to perform an end-to-end machine learning 
+workflow. It uses MLflow Projects to manage and execute each stage, such as data 
+cleaning, training, testing, and optional deployment.
 
 Author: Vitor Abdo
-Date: Oct/2024
+Date: October 2024
 '''
 
-# import necessary packages
 import argparse
 import mlflow
 
-# define argument parser
+# Define argument parser
 parser = argparse.ArgumentParser()
-parser.add_argument('--steps', type=str, default='all', help='Steps to execute')
+parser.add_argument('--steps', type=str, default='all', help='Pipeline steps to execute')
 
+# Define the list of steps in the pipeline
 _steps = [
     'basic_clean',
-    'train_test_model',
-    # 'train_model',
-    # 'test_model',
-    # 'deployment'
+    'train_test_model'
 ]
 
 def main():
     '''
-    Executes the end-to-end pipeline using MLflow based on the specified steps.
+    Runs specified steps in the ML pipeline, controlled through command-line arguments.
 
-    This function reads command line arguments to determine which steps of the pipeline 
-    should be executed. The steps can include 'basic_clean', 'data_check', 'train_model', 
-    'test_model', and 'deployment'. By default, all steps are run if no specific steps 
-    are provided or if 'all' is passed as a parameter.
+    This function processes the steps argument to determine which pipeline stages to execute. 
+    Available steps include 'basic_clean' for data preprocessing and 'train_test_model' for 
+    training and testing the model. By default, if no specific steps are provided or 'all' 
+    is passed, the entire pipeline is executed.
 
-    The pipeline steps are executed via MLflow projects using their corresponding URIs.
+    The steps are launched via MLflow Projects, which directs the MLflow tracking server 
+    and fetches project components using designated URIs.
 
     Args:
-        steps (str): A comma-separated string specifying which steps to execute. 
-                     The default value is 'all', which runs the entire pipeline. 
-                     Valid options include 'basic_clean', 'data_check', 'train_model', 
-                     'test_model', 'deployment'.
+        --steps (str): A comma-separated list indicating steps to execute, e.g., 
+                       'basic_clean,train_test_model'. Default is 'all' to run every step.
     '''
-    # read command line arguments
+    # Parse command-line arguments
     args = parser.parse_args()
 
-    # Steps to execute
+    # Determine which steps to run
     steps_par = args.steps
     active_steps = steps_par.split(',') if steps_par != 'all' else _steps
 
+    # Run data cleaning step if specified
     if 'basic_clean' in active_steps:
         project_uri = 'https://github.com/vitorbeltrao/data_role_advisor#components/01_basic_clean'
         mlflow.run(project_uri, parameters={'steps': 'basic_clean'})
 
+    # Run training and testing step if specified
     if 'train_test_model' in active_steps:
+        mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/')
         project_uri = 'https://github.com/vitorbeltrao/data_role_advisor#components/02_train_test_model'
         mlflow.run(project_uri)
 
-    # if 'train_model' in active_steps:
-    #     project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/05_train_model'
-    #     mlflow.run(project_uri, parameters={'steps': 'train_model'})
-
-    # if 'test_model' in active_steps:
-    #     project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/06_test_model'
-    #     mlflow.run(project_uri, parameters={'steps': 'test_model'})
-
-    # if 'deployment' in active_steps:
-    #     project_uri = 'https://github.com/vitorbeltrao/risk_assessment#components/07_deployment'
-    #     mlflow.run(project_uri, parameters={'steps': 'deployment'})
 
 if __name__ == "__main__":
     main()
