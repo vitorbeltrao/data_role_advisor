@@ -307,8 +307,15 @@ if __name__ == "__main__":
     yaml_file = 'model_config.yaml'
     config = load_model_configs(yaml_file)
 
+    # Execute experiment
+    experiment_name = config['experiment']['name']
+
+    # If experiment doesn't exist, create it
+    if (not(mlflow.get_experiment_by_name(experiment_name))):
+        mlflow.create_experiment(experiment_name)
+
     # Set up the running experiment to registry in mlflow
-    experiment = mlflow.set_experiment(['experiment']['name'])
+    experiment = mlflow.set_experiment(experiment_name)
     experiment_id = experiment.experiment_id
 
     # Get the dataset
