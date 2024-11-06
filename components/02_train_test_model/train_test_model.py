@@ -15,7 +15,6 @@ import timeit
 import boto3
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 import seaborn as sns
 from datetime import datetime
 from mlflow.models.signature import infer_signature
@@ -309,7 +308,8 @@ if __name__ == "__main__":
     config = load_model_configs(yaml_file)
 
     # Set up the running experiment to registry in mlflow
-    experiment_id = mlflow.create_experiment("Data Role Advisor Experiment I")
+    experiment = mlflow.set_experiment(['experiment']['name'])
+    experiment_id = experiment.experiment_id
 
     # Get the dataset
     s3_client = boto3.client('s3')
