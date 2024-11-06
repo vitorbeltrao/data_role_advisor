@@ -309,8 +309,7 @@ if __name__ == "__main__":
     config = load_model_configs(yaml_file)
 
     # Set up the running experiment to registry in mlflow
-    experiment = mlflow.set_experiment('Data Role Advisor Experiment I')
-    experiment_id = experiment.experiment_id
+    experiment_id = mlflow.create_experiment("Data Role Advisor Experiment I")
 
     # Get the dataset
     s3_client = boto3.client('s3')
