@@ -11,6 +11,7 @@ Date: October 2024
 
 import argparse
 import mlflow
+from mlflow.tracking import MlflowClient
 
 # Define argument parser
 parser = argparse.ArgumentParser()
@@ -52,7 +53,6 @@ def main():
 
     # Run training and testing step if specified
     if 'train_test_model' in active_steps:
-        mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/')
         project_uri = 'https://github.com/vitorbeltrao/data_role_advisor#components/02_train_test_model'
         mlflow.run(project_uri)
 

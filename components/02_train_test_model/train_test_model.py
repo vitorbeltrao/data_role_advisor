@@ -208,6 +208,7 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
+    mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/')
     with mlflow.start_run(experiment_id=experiment_id):
         # Log experiment metadata
         mlflow.log_param('Date', date)
