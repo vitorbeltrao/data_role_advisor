@@ -175,6 +175,7 @@ def load_model_configs(yaml_file):
 
 def run_grid_search(
         config,
+        experiment_name,
         dataset,
         test_size,
         label_column,
@@ -206,7 +207,6 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
-    experiment_name = config['experiment']['name']
 
     # If experiment doesn't exist, create it
     if (not(mlflow.get_experiment_by_name(experiment_name))):
@@ -326,6 +326,7 @@ if __name__ == "__main__":
     for model_config in config['models']:
         run_grid_search(
             config=model_config,
+            experiment_name=config['experiment']['name'],
             dataset=cleaned_dataset,
             test_size=config['experiment']['test_size'],
             label_column=config['experiment']['label_column'],
