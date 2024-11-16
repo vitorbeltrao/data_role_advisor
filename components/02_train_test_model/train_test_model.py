@@ -208,98 +208,107 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
-    mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/')
-    with mlflow.start_run(experiment_id=experiment_id):
-        # Log experiment metadata
-        mlflow.log_param('Date', date)
-        mlflow.log_param('Experiment_id', experiment_id)
-        run = mlflow.active_run()
-        mlflow.log_param('Active run', run.info.run_id)
 
-        # Define pipeline
-        pipeline = Pipeline(steps=[
-            ('preprocessor', preproc),
-            (config['name'], eval(config['model']))
-        ])
+    # If experiment doesn't exist, create it
+    if (not(mlflow.get_experiment_by_name(experiment_name))):
+        mlflow.create_experiment(experiment_name)
 
-        # Define grid search
-        logging.info('Training the model...')
-        starttime = timeit.default_timer()
-        grid_search = GridSearchCV(
-            pipeline,
-            param_grid=config['param_grid'],
-            cv=cv,
-            scoring=scoring,
-            return_train_score=True,
-            refit=refit
-        )
-        grid_search.fit(X_train, y_train)
-        timing = timeit.default_timer() - starttime
-        logging.info(f'The execution time of the model was:{timing}')
+    # Set up the running experiment to registry in mlflow
+    experiment = mlflow.set_experiment(experiment_name)
+    experiment_id = experiment.experiment_id
 
-        # Log best parameters
-        mlflow.log_params(grid_search.best_params_)
+    # Log experiment metadata
+    mlflow.start_run()
+    mlflow.log_param('Date', date)
+    mlflow.log_param('Experiment_id', experiment_id)
+    run = mlflow.active_run()
+    mlflow.log_param('Active run', run.info.run_id)
 
-        # Log metrics
-        best_index = grid_search.best_index_
-        for metric in scoring:
-            best_train_score = grid_search.cv_results_[
-                f'mean_train_{metric}'][best_index]
-            best_val_score = grid_search.cv_results_[
-                f'mean_test_{metric}'][best_index]
-            mlflow.log_metric(f'train_{metric}', best_train_score)
-            mlflow.log_metric(f'val_{metric}', best_val_score)
+    # Define pipeline
+    pipeline = Pipeline(steps=[
+        ('preprocessor', preproc),
+        (config['name'], eval(config['model']))
+    ])
 
-        # Log feature importances
-        feature_importance_plot(
-            grid_search.best_estimator_.named_steps[config['name']],
-            grid_search.best_estimator_.named_steps['preprocessor'],
-            f'feature_importance_{config['name']}.png')
-        mlflow.log_artifact(f'feature_importance_{config['name']}.png')
+    # Define grid search
+    logging.info('Training the model...')
+    starttime = timeit.default_timer()
+    grid_search = GridSearchCV(
+        pipeline,
+        param_grid=config['param_grid'],
+        cv=cv,
+        scoring=scoring,
+        return_train_score=True,
+        refit=refit
+    )
+    grid_search.fit(X_train, y_train)
+    timing = timeit.default_timer() - starttime
+    logging.info(f'The execution time of the model was:{timing}')
 
-        # Test on the test dataset
-        final_model = grid_search.best_estimator_
-        final_predictions = final_model.predict(X_test)
-        confusion_matrix_plot(
-            y_test,
-            final_predictions,
-            f'confusion_matrix_{config['name']}.png')
-        for metric in scoring:
-            if metric == 'accuracy' or metric == 'balanced_accuracy':
-                test_score = balanced_accuracy_score(y_test, final_predictions)
-            elif metric == 'precision':
-                test_score = precision_score(y_test, final_predictions)
-            elif metric == 'recall':
-                test_score = recall_score(y_test, final_predictions)
-            elif metric == 'f1':
-                test_score = f1_score(y_test, final_predictions)
-            else:
-                raise ValueError(
-                    f'Metric {metric} is not implemented for logging on test data.')
+    # Log best parameters
+    mlflow.log_params(grid_search.best_params_)
 
-            mlflow.log_metric(f'test_{metric}', test_score)
-            mlflow.log_artifact(f'confusion_matrix_{config['name']}.png')
+    # Log metrics
+    best_index = grid_search.best_index_
+    for metric in scoring:
+        best_train_score = grid_search.cv_results_[
+            f'mean_train_{metric}'][best_index]
+        best_val_score = grid_search.cv_results_[
+            f'mean_test_{metric}'][best_index]
+        mlflow.log_metric(f'train_{metric}', best_train_score)
+        mlflow.log_metric(f'val_{metric}', best_val_score)
 
-        # Log the model
-        signature = infer_signature(X_test, final_predictions)
-        if config['name'] == 'XGBClassifier':
-            mlflow.xgboost.log_model(
-                grid_search.best_estimator_.named_steps[config['name']],
-                'best_model',
-                signature=signature,
-                input_example=X_test.head(1))
+    # Log feature importances
+    feature_importance_plot(
+        grid_search.best_estimator_.named_steps[config['name']],
+        grid_search.best_estimator_.named_steps['preprocessor'],
+        f'feature_importance_{config['name']}.png')
+    mlflow.log_artifact(f'feature_importance_{config['name']}.png')
+
+    # Test on the test dataset
+    final_model = grid_search.best_estimator_
+    final_predictions = final_model.predict(X_test)
+    confusion_matrix_plot(
+        y_test,
+        final_predictions,
+        f'confusion_matrix_{config['name']}.png')
+    for metric in scoring:
+        if metric == 'accuracy' or metric == 'balanced_accuracy':
+            test_score = balanced_accuracy_score(y_test, final_predictions)
+        elif metric == 'precision':
+            test_score = precision_score(y_test, final_predictions)
+        elif metric == 'recall':
+            test_score = recall_score(y_test, final_predictions)
+        elif metric == 'f1':
+            test_score = f1_score(y_test, final_predictions)
         else:
-            mlflow.sklearn.log_model(
-                grid_search.best_estimator_.named_steps[config['name']],
-                'best_model',
-                signature=signature,
-                input_example=X_test.head(1))
+            raise ValueError(
+                f'Metric {metric} is not implemented for logging on test data.')
 
-        # Register the model
-        mlflow.register_model(
-            f'runs:/{run.info.run_id}/best_model',
-            config['name'])
+        mlflow.log_metric(f'test_{metric}', test_score)
+        mlflow.log_artifact(f'confusion_matrix_{config['name']}.png')
 
+    # Log the model
+    signature = infer_signature(X_test, final_predictions)
+    if config['name'] == 'XGBClassifier':
+        mlflow.xgboost.log_model(
+            grid_search.best_estimator_.named_steps[config['name']],
+            'best_model',
+            signature=signature,
+            input_example=X_test.head(1))
+    else:
+        mlflow.sklearn.log_model(
+            grid_search.best_estimator_.named_steps[config['name']],
+            'best_model',
+            signature=signature,
+            input_example=X_test.head(1))
+
+    # Register the model
+    mlflow.register_model(
+        f'runs:/{run.info.run_id}/best_model',
+        config['name'])
+
+    mlflow.end_run()
     logging.info('Finish model tracking with mlflow.')
 
 
