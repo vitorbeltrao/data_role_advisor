@@ -20,4 +20,4 @@ ENV AWS_REGION=$AWS_REGION
 RUN conda env create -f environment.yaml
 
 # Ativar o ambiente Conda no ENTRYPOINT e rodar o script
-ENTRYPOINT ["bash", "-c", "source activate data_role_advisor && mlflow run . --experiment-name='Data Role Advisor Experiment I'"]
+ENTRYPOINT ["bash", "-c", 'source activate data_role_advisor && mlflow run . --experiment-name="Data Role Advisor Experiment I"']
