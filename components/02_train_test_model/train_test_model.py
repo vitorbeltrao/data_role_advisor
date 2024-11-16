@@ -213,7 +213,7 @@ def run_grid_search(
     #     mlflow.create_experiment(experiment_name)
 
     # Set up the running experiment to registry in mlflow
-    experiment = mlflow.set_experiment(experiment_id=0)
+    experiment = mlflow.set_experiment(experiment_name='Default')
     experiment_id = experiment.experiment_id
     mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/')
 
