@@ -209,11 +209,11 @@ def run_grid_search(
     logging.info('Start tracking the model with mlflow...')
 
     # If experiment doesn't exist, create it
-    if (not(mlflow.get_experiment_by_name(experiment_name))):
-        mlflow.create_experiment(experiment_name)
+    # if (not(mlflow.get_experiment_by_name(experiment_name))):
+    #     mlflow.create_experiment(experiment_name)
 
     # Set up the running experiment to registry in mlflow
-    experiment = mlflow.set_experiment(experiment_name)
+    experiment = mlflow.set_experiment()
     experiment_id = experiment.experiment_id
     mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/')
 
