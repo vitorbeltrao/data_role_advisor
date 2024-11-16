@@ -11,7 +11,6 @@ Date: October 2024
 
 import argparse
 import mlflow
-from mlflow.tracking import MlflowClient
 
 # Define argument parser
 parser = argparse.ArgumentParser()

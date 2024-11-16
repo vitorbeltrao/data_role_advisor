@@ -175,7 +175,6 @@ def load_model_configs(yaml_file):
 
 def run_grid_search(
         config,
-        experiment_id,
         dataset,
         test_size,
         label_column,
@@ -187,7 +186,6 @@ def run_grid_search(
 
     Args:
         config (dict): Model configuration containing parameters and grid search settings.
-        experiment_id (str): The ID of the experiment in MLflow.
         dataset (str): The path to the dataset file.
         test_size (float): The proportion of the dataset to include in the test split.
         label_column (str): The name of the column to use as the target variable.
@@ -208,6 +206,7 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
+    experiment_name = config['experiment']['name']
 
     # If experiment doesn't exist, create it
     if (not(mlflow.get_experiment_by_name(experiment_name))):
@@ -317,17 +316,6 @@ if __name__ == "__main__":
     yaml_file = 'model_config.yaml'
     config = load_model_configs(yaml_file)
 
-    # Execute experiment
-    experiment_name = config['experiment']['name']
-
-    # If experiment doesn't exist, create it
-    if (not(mlflow.get_experiment_by_name(experiment_name))):
-        mlflow.create_experiment(experiment_name)
-
-    # Set up the running experiment to registry in mlflow
-    experiment = mlflow.set_experiment(experiment_name)
-    experiment_id = experiment.experiment_id
-
     # Get the dataset
     s3_client = boto3.client('s3')
     obj = s3_client.get_object(Bucket=BUCKET_NAME_DATA, Key=BUCKET_KEY_NAME)
@@ -338,7 +326,6 @@ if __name__ == "__main__":
     for model_config in config['models']:
         run_grid_search(
             config=model_config,
-            experiment_id=experiment_id,
             dataset=cleaned_dataset,
             test_size=config['experiment']['test_size'],
             label_column=config['experiment']['label_column'],
