@@ -207,8 +207,8 @@ def run_grid_search(
     y_test = test_set[label_column]
 
     logging.info('Start tracking the model with mlflow...')
-    
-    mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000')
+
+    # mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000')
     logging.info('Tracking server uri was connected.')
 
     # If experiment doesn't exist, create it
