@@ -220,7 +220,7 @@ def run_grid_search(
     experiment_id = experiment.experiment_id
 
     # Log experiment metadata
-    mlflow.start_run(experiment_id=experiment_id)
+    mlflow.start_run()
     mlflow.log_param('Date', date)
     mlflow.log_param('Experiment_id', experiment_id)
     run = mlflow.active_run()
