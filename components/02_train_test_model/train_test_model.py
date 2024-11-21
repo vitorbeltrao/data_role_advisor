@@ -53,21 +53,6 @@ binary_feat = [
     'usa_sql',
     'desenvolve_modelos_machine_learning']
 
-ec2_client = boto3.client('ec2', region_name='us-east-1') 
-response = ec2_client.describe_instances(
-    Filters=[
-        {'Name': 'instance-state-name', 'Values': ['running']}
-    ]
-)
-active_instance_ids = [
-    instance['InstanceId']
-    for reservation in response['Reservations']
-    for instance in reservation['Instances']
-]
-
-print("IDs das instâncias EC2 ativas:", active_instance_ids)
-
-
 logging.basicConfig(
     level=logging.INFO,
     force=True,
@@ -338,6 +323,16 @@ if __name__ == "__main__":
     obj = s3_client.get_object(Bucket=BUCKET_NAME_DATA, Key=BUCKET_KEY_NAME)
     dataset = pd.read_csv(obj['Body'])
     cleaned_dataset = dataset[all_feat]
+
+    # list active experiments in ec2
+    # Listar todos os experimentos ativos
+    experiments = mlflow.list_experiments()
+
+    # Exibir os experimentos
+    print(f"{'Experiment Id':<20}{'Name':<40}{'Artifact Location'}")
+    print("-" * 100)
+    for exp in experiments:
+        print(f"{exp.experiment_id:<20}{exp.name:<40}{exp.artifact_location}")
 
     # Execute the "run_grid_search" func
     for model_config in config['models']:
