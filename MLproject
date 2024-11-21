@@ -4,6 +4,4 @@ conda_env: conda.yaml
 
 entry_points:
   main:
-    parameters:
-      experiment_name: {type: str, default: "default_experiment"}
-    command: "python main.py --experiment-name {experiment_name}"
+    command: "python main.py"
