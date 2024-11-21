@@ -318,10 +318,10 @@ if __name__ == "__main__":
     experiment_name = config['experiment']['name']
     experiment = mlflow.get_experiment_by_name(experiment_name)
 
-    # If experiment doesn't exist, create it
-    if (not(mlflow.get_experiment_by_name(experiment_name))):
-        mlflow.create_experiment(experiment_name)
-    mlflow.set_experiment(experiment_id=experiment.experiment_id)
+    # # If experiment doesn't exist, create it
+    # if (not(mlflow.get_experiment_by_name(experiment_name))):
+    #     mlflow.create_experiment(experiment_name)
+    # mlflow.set_experiment(experiment_id=experiment.experiment_id)
 
     # Execute the "run_grid_search" func
     for model_config in config['models']:
