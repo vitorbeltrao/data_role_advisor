@@ -53,6 +53,20 @@ binary_feat = [
     'usa_sql',
     'desenvolve_modelos_machine_learning']
 
+ec2_client = boto3.client('ec2', region_name='us-east-1') 
+response = ec2_client.describe_instances(
+    Filters=[
+        {'Name': 'instance-state-name', 'Values': ['running']}
+    ]
+)
+active_instance_ids = [
+    instance['InstanceId']
+    for reservation in response['Reservations']
+    for instance in reservation['Instances']
+]
+
+print("IDs das instâncias EC2 ativas:", active_instance_ids)
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -208,7 +222,7 @@ def run_grid_search(
 
     logging.info('Start tracking the model with mlflow...')
 
-    mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000')
+    # mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000')
     logging.info('Tracking server uri was connected.')
 
     # If experiment doesn't exist, create it
