@@ -312,15 +312,13 @@ if __name__ == "__main__":
     dataset = pd.read_csv(obj['Body'])
     cleaned_dataset = dataset[all_feat]
 
-    # list active experiments in ec2
-    mlflow.set_tracking_uri('http://ec2-3-91-197-2.compute-1.amazonaws.com:5000')
+    # try to set the experimet and recover id
     experiment_name = config['experiment']['name']
     experiment = mlflow.get_experiment_by_name(experiment_name)
-
-    # # If experiment doesn't exist, create it
-    # if (not(mlflow.get_experiment_by_name(experiment_name))):
-    #     mlflow.create_experiment(experiment_name)
-    # mlflow.set_experiment(experiment_id=experiment.experiment_id)
+    if experiment is None:
+        experiment_id = mlflow.create_experiment(experiment_name)
+    else:
+        experiment_id = experiment.experiment_id
 
     # Execute the "run_grid_search" func
     for model_config in config['models']:
