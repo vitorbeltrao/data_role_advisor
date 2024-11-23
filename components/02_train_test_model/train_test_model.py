@@ -33,10 +33,9 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 # config
-# BUCKET_NAME_DATA = sys.argv[1]
-# BUCKET_KEY_NAME = sys.argv[2]
-BUCKET_NAME_DATA = 'datasets-data-role-advisor'
-BUCKET_KEY_NAME = 'bronze/data_hackers_final.csv'
+BUCKET_NAME_DATA = sys.argv[1]
+BUCKET_KEY_NAME = sys.argv[2]
+
 all_feat = [
     'experiencia_manter_infraestrutura_modelos_e_solucoes_dados',
     'desenvolve_pipelines_dados',
