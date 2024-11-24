@@ -54,13 +54,13 @@ class ModelInput(BaseModel):
 # Function to load the model from S3
 def load_model_from_s3(bucket_name, model_key):
     s3 = boto3.client('s3')
-    model_path = '/tmp/model.xgb'  # Local path to save the model temporarily
-    s3.download_file(bucket_name, model_key, model_path)
-    
-    # Load the XGBoost model
-    model = xgb.Booster()
-    model.load_model(model_path)
-    return model
+    model_path = '/tmp/model.xgb'
+    try:
+        s3.download_file(bucket_name, model_key, model_path)
+        logging.info(f"Model downloaded to {model_path}")
+    except Exception as e:
+        logging.error(f"Failed to download model: {e}")
+        raise
 
 # Get mlflow model from s3 bucket
 bucket_name = 'data-role-advisor-mlflow-artifacts' 

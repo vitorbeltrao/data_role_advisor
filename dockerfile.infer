@@ -1,0 +1,15 @@
+# Base Docker image
+FROM continuumio/miniconda3:latest
+
+# Set working directory
+WORKDIR /infer_app
+
+# Copy application files to container
+
+COPY . /infer_app
+
+# Install dependencies via Conda
+RUN conda env create -f environment.yaml
+
+# Default command to run the FastAPI application
+ENTRYPOINT ["bash", "-c", "source activate data_role_advisor && uvicorn ml_api:app --host 0.0.0.0 --port 8080"]

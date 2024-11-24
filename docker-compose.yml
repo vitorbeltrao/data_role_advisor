@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  train:
+    build:
+      context: .
+      dockerfile: dockerfile.train
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    command: bash -c "source activate data_role_advisor && mlflow run . --experiment-name='Data Role Advisor Experiment III'"
+
+  infer:
+    build:
+      context: .
+      dockerfile: dockerfile.infer
+    ports:
+      - "8080:8080"
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    command: bash -c "source activate data_role_advisor && uvicorn ml_api:app --host 0.0.0.0 --port 8080"

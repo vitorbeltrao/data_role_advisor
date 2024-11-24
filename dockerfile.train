@@ -1,0 +1,16 @@
+FROM continuumio/miniconda3:latest
+
+# Definir o diretório de trabalho
+WORKDIR /train_app
+
+# Copiar os arquivos para o contêiner
+COPY . /train_app
+
+# Instalar os pacotes necessários
+RUN conda env create -f environment.yaml
+
+# Selecionar a variável de ambiente correta para o MLflow
+ENV MLFLOW_TRACKING_URI=http://ec2-3-91-197-2.compute-1.amazonaws.com:5000/
+
+# Ativar o ambiente Conda no ENTRYPOINT e rodar o script
+ENTRYPOINT ["bash", "-c", "source activate data_role_advisor && mlflow run . --experiment-name='Data Role Advisor Experiment III'"]
