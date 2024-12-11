@@ -17,20 +17,20 @@ jobs:
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          conda-version: 'latest'
           environment-file: environment.yaml
           auto-activate-base: false
 
-      - name: Verify Conda environment
+      - name: Update Conda
+        run: conda update -n base -c defaults conda --yes
+
+      - name: Verify Conda Environment
         run: |
           conda --version
           conda info
           conda list
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          conda init bash
-          source ~/.bashrc
           conda activate data_role_advisor
           pip install pytest
         env:
