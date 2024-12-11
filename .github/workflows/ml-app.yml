@@ -14,6 +14,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          conda-version: 'latest'
+          environment-file: environment.yaml
+          auto-activate-base: false
+
+      - name: Install dependencies
+        run: |
+          conda activate data_role_advisor
+          pip install pytest
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
@@ -31,7 +47,7 @@ jobs:
 
       - name: Run Tests
         run: pytest tests/
-    
+
       - name: Stop and Remove Services
         run: docker compose down
 
