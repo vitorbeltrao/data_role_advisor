@@ -17,20 +17,21 @@ jobs:
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: 3.12
+          environment-file: environment.yaml
           auto-activate-base: false
 
-      - name: Initialize Conda Shell
-        run: |
-          conda init bash
-          source ~/.bashrc
+      - name: Update Conda
+        run: conda update -n base -c defaults conda --yes
 
-      - name: Create Conda Environment
+      - name: Install Dependencies
         run: |
-          conda create -n data_role_advisor python=3.12 --yes
-          source ~/.bashrc
+          eval "$(conda shell.bash hook)"
           conda activate data_role_advisor
-          pip install -r requirements.txt
+          conda info --envs
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -42,8 +43,6 @@ jobs:
         run: |
           docker compose up --build --detach
           docker compose ps
-          docker tag data_role_advisor-train ${{ secrets.DOCKER_USERNAME }}/train_app:latest
-          docker tag data_role_advisor-infer ${{ secrets.DOCKER_USERNAME }}/infer_app:latest
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -51,7 +50,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          source ~/.bashrc
+          eval "$(conda shell.bash hook)"
           conda activate data_role_advisor
           pytest tests/
 
