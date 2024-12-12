@@ -20,10 +20,15 @@ jobs:
           python-version: 3.12
           auto-activate-base: false
 
+      - name: Initialize Conda Shell
+        run: |
+          conda init bash
+          source ~/.bashrc
+
       - name: Create Conda Environment
         run: |
           conda create -n data_role_advisor python=3.12 --yes
-          conda init
+          source ~/.bashrc
           conda activate data_role_advisor
           pip install -r requirements.txt
 
@@ -46,6 +51,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          source ~/.bashrc
           conda activate data_role_advisor
           pytest tests/
 
