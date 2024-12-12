@@ -65,9 +65,6 @@ jobs:
           conda activate data_role_advisor
           pytest tests/
 
-      - name: Stop and Remove Services
-        run: docker compose down
-
   push-images:
     name: Push Docker Images
     needs: build-and-test
