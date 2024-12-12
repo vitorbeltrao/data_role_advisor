@@ -23,6 +23,7 @@ jobs:
       - name: Create Conda Environment
         run: |
           conda create -n data_role_advisor python=3.12 --yes
+          conda init
           conda activate data_role_advisor
           pip install -r requirements.txt
 
