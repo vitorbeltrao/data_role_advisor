@@ -85,10 +85,8 @@ jobs:
 
       - name: Push Train Image
         run: |
-          docker tag data_role_advisor-train:latest ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-train:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-train:latest
+          docker image push data_role_advisor-train:latest
 
       - name: Push Infer Image
         run: |
-          docker tag data_role_advisor-infer:latest ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-infer:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-infer:latest
+          docker image push data_role_advisor-infer:latest
