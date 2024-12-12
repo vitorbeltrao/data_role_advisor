@@ -1,74 +1,18 @@
-name: App test
+name: Workflow 2
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["App test"]
+    types:
+      - completed
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  dependent-job:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-activate-base: false
-
-      - name: Debug Environment File
-        run: cat environment.yaml
-
-      - name: Manually Create Conda Environment
-        run: |
-          conda env create -f environment.yaml || echo "Environment already exists"
-          conda info --envs
-
-      - name: Update Conda
-        run: conda update -n base -c defaults conda --yes
-
-      - name: Activate Conda Environment
-        run: |
-          eval "$(conda shell.bash hook)"
-          conda activate data_role_advisor
-          conda info --envs
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and Test Services with Docker Compose
-        run: |
-          docker compose up --build --detach
-          docker compose ps
-          docker images 
-          echo "Verificando imagens específicas:"
-          docker images data_role_advisor-train
-          docker images data_role_advisor-infer
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Run Tests
-        run: |
-          eval "$(conda shell.bash hook)"
-          conda activate data_role_advisor
-          pytest tests/
-
-      - name: Stop and Remove Services
-        run: docker compose down
-
-      - name: Set output status
-        id: set-output
-        run: |
-          echo "status=success" >> $GITHUB_ENV
+      - name: Run your steps
+        run: echo "Running workflow 2 after Workflow 1 succeeded"
