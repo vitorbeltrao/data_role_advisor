@@ -50,8 +50,7 @@ jobs:
         run: |
           docker compose up --build --detach
           docker compose ps
-          docker tag data_role_advisor-train ${{ secrets.DOCKER_USERNAME }}/train_app:latest
-          docker tag data_role_advisor-infer ${{ secrets.DOCKER_USERNAME }}/infer_app:latest
+          docker images
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -82,7 +81,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push Train Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/train_app:latest
+        run: docker push data_role_advisor-train:latest
 
       - name: Push Infer Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/infer_app:latest
+        run: docker push data_role_advisor-infer:latest
