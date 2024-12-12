@@ -50,7 +50,10 @@ jobs:
         run: |
           docker compose up --build --detach
           docker compose ps
-          docker images
+          docker images 
+          echo "Verificando imagens específicas:"
+          docker images data_role_advisor-train
+          docker images data_role_advisor-infer
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -61,6 +64,9 @@ jobs:
           eval "$(conda shell.bash hook)"
           conda activate data_role_advisor
           pytest tests/
+
+      - name: Stop and Remove Services
+        run: docker compose down
 
   push-images:
     name: Push Docker Images
@@ -78,7 +84,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push Train Image
-        run: docker push data_role_advisor-train:latest
+        run: |
+          docker tag data_role_advisor-train:latest ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-train:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-train:latest
 
       - name: Push Infer Image
-        run: docker push data_role_advisor-infer:latest
+        run: |
+          docker tag data_role_advisor-infer:latest ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-infer:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/data_role_advisor-infer:latest
