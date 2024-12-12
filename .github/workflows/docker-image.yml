@@ -24,6 +24,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Test Services with Docker Compose
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           docker compose up --build --detach
           docker compose ps
@@ -31,10 +35,6 @@ jobs:
           echo "Verificando imagens específicas:"
           docker images data_role_advisor-train
           docker images data_role_advisor-infer
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION: ${{ secrets.AWS_REGION }}
   
       - name: Push Train Image
         run: docker push vitorabdo/data-role-advisor:latest
