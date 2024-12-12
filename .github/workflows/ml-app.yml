@@ -17,20 +17,13 @@ jobs:
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
+          environment-file: environment.yaml
           auto-activate-base: false
-
-      - name: Debug Environment File
-        run: cat environment.yaml
-
-      - name: Manually Create Conda Environment
-        run: |
-          conda env create -f environment.yaml || echo "Environment already exists"
-          conda info --envs
 
       - name: Update Conda
         run: conda update -n base -c defaults conda --yes
 
-      - name: Activate Conda Environment
+      - name: Install Dependencies
         run: |
           eval "$(conda shell.bash hook)"
           conda activate data_role_advisor
@@ -46,22 +39,24 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Test Services with Docker Compose
+      - name: Build Docker Images
         run: |
-          docker compose up --build --detach
-          docker compose ps
-          docker tag data_role_advisor-train ${{ secrets.DOCKER_USERNAME }}/train_app:latest
-          docker tag data_role_advisor-infer ${{ secrets.DOCKER_USERNAME }}/infer_app:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/train_app:latest -f dockerfile.train .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/infer_app:latest -f dockerfile.infer .
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Run Tests
+      - name: Test Services with Docker Compose
         run: |
-          eval "$(conda shell.bash hook)"
-          conda activate data_role_advisor
+          docker compose up --detach
+          docker compose ps
           pytest tests/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Stop and Remove Services
         run: docker compose down
