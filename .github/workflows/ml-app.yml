@@ -82,8 +82,8 @@ jobs:
 
       - name: Push Train Image
         run: |
-          docker push vitorabdo/data-role-advisor
+          docker push data-role-advisor-train
 
       - name: Push Infer Image
         run: |
-          docker push vitorabdo/data-role-advisor
+          docker push data-role-advisor-infer
