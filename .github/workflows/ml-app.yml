@@ -17,13 +17,20 @@ jobs:
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: environment.yaml
           auto-activate-base: false
+
+      - name: Debug Environment File
+        run: cat environment.yaml
+
+      - name: Manually Create Conda Environment
+        run: |
+          conda env create -f environment.yaml || echo "Environment already exists"
+          conda info --envs
 
       - name: Update Conda
         run: conda update -n base -c defaults conda --yes
 
-      - name: Install Dependencies
+      - name: Activate Conda Environment
         run: |
           eval "$(conda shell.bash hook)"
           conda activate data_role_advisor
