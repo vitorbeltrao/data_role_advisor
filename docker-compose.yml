@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile.train
-    image: ${DOCKER_USERNAME}/data_role_advisor-train:latest
+    image: data_role_advisor-train:latest
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile.infer
-    image: ${DOCKER_USERNAME}/data_role_advisor-infer:latest
+    image: data_role_advisor-infer:latest
     ports:
       - "8080:8080"
     environment:
