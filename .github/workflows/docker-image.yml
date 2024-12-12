@@ -1,6 +1,6 @@
 name: Cypress Docker Push
 on: 
   workflow_run:
-    workflows: ['App test']
+    workflows: ['Python application']
     types:
       - completed
