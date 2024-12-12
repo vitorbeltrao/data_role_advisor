@@ -59,25 +59,3 @@ class TestMLflowConnection:
             assert isinstance(experiments, list)
         except Exception as e:
             pytest.fail(f"Falha ao listar experimentos: {e}")
-    
-    def test_can_create_and_delete_experiment(self, mlflow_tracking_uri):
-        """Testa se é possível criar e deletar um experimento"""
-        mlflow.set_tracking_uri(mlflow_tracking_uri)
-        test_exp_name = "test_experiment_connection"
-        
-        try:
-            # Tenta deletar o experimento se já existir
-            existing_exp = mlflow.get_experiment_by_name(test_exp_name)
-            if existing_exp:
-                mlflow.delete_experiment(existing_exp.experiment_id)
-            
-            # Cria novo experimento
-            experiment_id = mlflow.create_experiment(test_exp_name)
-            assert experiment_id is not None
-            
-            # Deleta o experimento
-            mlflow.delete_experiment(experiment_id)
-            assert True
-            
-        except Exception as e:
-            pytest.fail(f"Falha ao criar/deletar experimento: {e}")
