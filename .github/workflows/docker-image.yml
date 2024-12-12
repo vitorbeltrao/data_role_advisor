@@ -22,11 +22,11 @@ jobs:
 
       - name: Build and Tag Train Image
         run: |
-          docker build -t vitorabdo/data-role-advisor-train:latest -f Dockerfile.train .
+          docker build -t vitorabdo/data-role-advisor-train:latest -f dockerfile.train .
       
       - name: Build and Tag Infer Image
         run: |
-          docker build -t vitorabdo/data-role-advisor-infer:latest -f Dockerfile.infer .
+          docker build -t vitorabdo/data-role-advisor-infer:latest -f dockerfile.infer .
 
       - name: Push Train Image
         run: docker push vitorabdo/data-role-advisor-train:latest
